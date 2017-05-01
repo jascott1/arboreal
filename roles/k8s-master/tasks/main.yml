@@ -1,0 +1,64 @@
+---
+
+- name: Kubeadm init
+  become: True
+#  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --service-cidr=10.3.3.0/24 --token {{ token }} --apiserver-advertise-address=172.16.35.11
+  command: kubeadm init --pod-network-cidr="{{ pod_cidr }}" --service-cidr="{{ service_cidr }}" --token {{ token }} --apiserver-advertise-address=172.16.35.11
+  register: kubeadm_init_out
+#--apiserver-advertise-address=172.16.35.11
+
+- name: Log Kubeadm init
+  debug: msg="{{ kubeadm_init_out }}"
+
+- name: Creates directory
+  file: path=.kube state=directory
+
+# TODO use ansible copy, use ansible vars for home
+- name: Copy admin.conf to ~/.kube/config
+  become: True
+  command: cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+
+# TODO use ansible vars for user, group and home
+- name: Chown .kube/config
+  become: True
+  command: chown -R "{{ ansible_ssh_user }}":"{{ ansible_ssh_user }}" /home/"{{ ansible_ssh_user }}"/.kube/
+
+#mkdir -p $HOME/.kube
+#sudo -H cp /etc/kubernetes/admin.conf $HOME/.kube/config
+#sudo -H chown $(id -u):$(id -g) $HOME/.kube/config
+
+# RBAC
+
+- name: Copy RBAC file
+  template:
+    src: rbac.yml
+    dest: /tmp/rbac.yml
+    mode: 0644
+
+- name: Override default RBAC settings
+  become: True
+  become_user: "{{ ansible_ssh_user }}"
+  command: sudo -E kubectl replace -f /tmp/rbac.yml
+
+# TODO remove when helm init can deal with taints and labels
+- name: Remove master taint
+  become: True
+  become_user: ubuntu
+  command: sudo -E kubectl taint nodes kube1 node-role.kubernetes.io/master-
+
+# Helm
+- name: Download Helm setup script with +x permission
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+    dest: /tmp/get_helm.sh
+    mode: 0777
+
+- name: Install Helm
+  #become: True
+  #become_user: ubuntu
+  command: /tmp/get_helm.sh
+
+- name: Run Helm Init
+  become: True
+  become_user: "{{ ansible_ssh_user }}"
+  command: helm init
