@@ -7,6 +7,19 @@
 - name: Gather facts
   setup:
 
+- name: Turn off SELINUX
+  lineinfile:
+    dest: /etc/selinux/config
+    regexp: '^SELINUX(.*)$'
+    line: 'SELINUX=permissive'
+  become: True
+  ignore_errors: True
+
+- name: Turn off Firewalld
+  shell: systemctl stop firewalld && systemctl disable firewalld
+  become: True
+  ignore_errors: True
+
 - name: Add hostname to /etc/hosts
   replace:
     dest: /etc/hosts
@@ -17,7 +30,7 @@
 # Deps
 
 ## Ubuntu
-- name: Install ubuntu ca certs
+- name: Install ca certs [Debian]
   package: name={{item}} state=latest
   become: True
   with_items:
@@ -31,8 +44,10 @@
     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
     state: present
   become: True
+  when:
+      - ansible_os_family == 'Debian'
 
-- name: Install google cloud apt gpg key
+- name: Install google cloud apt gpg key [Debian]
   apt_key:
     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
     state: present
@@ -40,7 +55,7 @@
   when:
     - ansible_os_family == 'Debian'
 
-- name: Install k8s components
+- name: Install k8s components [Debian]
   apt:
     name: "{{ item }}"
     state: present
@@ -58,45 +73,25 @@
     - ansible_os_family == 'Debian'
 
 ## CentOS
-#- name: Install ubuntu ca certs
-#  package: name={{item}} state=latest
-#  become: True
-#  with_items:
-#    - ca-certificates
-#    - apt-transport-https
-#  when:
-#    - ansible_os_family == 'Debian'
-
-
 - yum_repository:
     name: kubernetes
+    description: Kubernetes repo
     baseurl: http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
     state: present
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-    gpgcheck: yes
+    gpgcheck: no
+    repo_gpgcheck: yes
   become: True
   when:
-    - ansible_os_family == 'Redhat'
+    - ansible_os_family == 'RedHat'
 
-
-#- name: Install google cloud apt gpg key
-#  yum_key:
-#    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
-#    state: present
-#
-#  become: True
-#  when:
-#    - ansible_os_family == 'Debian'
-#    - ansible_distribution == 'Ubuntu'
-
-- name: Install k8s components (centos)
+- name: Install k8s components [RedHat]
   yum:
     name: "{{ item }}"
     state: present
-    allow_unauthenticated: yes
     update_cache: True
   with_items:
-    - docker.io
+    - docker
     - kubelet
     - kubeadm
     - kubectl
@@ -106,7 +101,7 @@
     - gcc
   become: True
   when:
-    - ansible_os_family == 'Redhat'
+    - ansible_os_family == 'RedHat'
 
 # Docker
 
@@ -114,12 +109,21 @@
   systemd: name=docker state=started enabled=yes
   become: True
 
-- name: Disable cri and set Cgroup Driver
-  replace:
+- name: Get CGROUP_DRIVER
+  become: True
+  shell: "docker info | grep \"Cgroup Driver\" | awk '{print $3}'"
+  register: cgroup_driver
+
+- name: Log CGROUP_DRIVER
+  debug: msg="{{ cgroup_driver }}"
+
+- name: Disable CRU and set CGROUP_DRIVER
+  lineinfile:
     dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    regexp: 'KUBELET_KUBECONFIG_ARGS='
-    replace: 'KUBELET_KUBECONFIG_ARGS=--cgroup-driver=cgroupfs --enable-cri=false '
-    # CGROUP_DRIVER=$(sudo docker info | grep "Cgroup Driver" | awk '{print $3}')
+    regexp: '^(.*)KUBELET_KUBECONFIG_ARGS=(.*)$'
+    line: '\1KUBELET_KUBECONFIG_ARGS=--cgroup-driver={{ cgroup_driver.stdout }} --enable-cri=false \2'
+    backup: yes
+    backrefs: yes
   become: True
 
 - name: Replace DNS IP
@@ -128,7 +132,6 @@
     regexp: '10.96.0.10'
     replace: "{{ kube_dns_ip }}"
   become: True
-
 
 - name: reload systemd
   become: True
@@ -141,8 +144,3 @@
 - name: Enable and start kubelet
   become: True
   systemd: name=kubelet state=started enabled=yes
-
-
-
-
-

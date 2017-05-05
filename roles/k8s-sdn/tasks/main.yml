@@ -2,15 +2,20 @@
 
 - name: Get canal.yaml
   get_url:
-    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml
+    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml
     dest: /tmp/canal.yaml
+    mode: 0664
+
+- name: Get rbac.yaml
+  get_url:
+    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml
+    dest: /tmp/rbac.yaml
     mode: 0664
 
 - name: Replace canal network IP
   replace:
     destfile: /tmp/canal.yaml
     regexp: '192.168.0.0'
-    #replace: '10.1.0.0'
     replace: "{{ canal_pod_network }}"
 
 - name: Replace canal DNS IP
@@ -19,13 +24,12 @@
     regexp: '10.96.232.136'
     replace: "{{ canal_dns_ip }}"
 
-- name: Kubectl apply canal
+- name: Kubectl create RBAC (canal)
   become: True
-  become_user: ubuntu
-  command: sudo kubectl apply -f /tmp/canal.yaml
+  become_user: "{{ username }}"
+  command: kubectl create -f /tmp/rbac.yaml
 
-
-#curl -L https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/kubeadm/1.6/canal.yaml -o canal.yaml
-#sed -i "s@192.168.0.0/16@10.1.0.0/16@" canal.yaml
-#sed -i "s@10.96.232.136@10.3.3.100@" canal.yaml
-#kubectl apply -f canal.yaml
+- name: Kubectl create canal
+  become: True
+  become_user: "{{ username }}"
+  command: kubectl create -f /tmp/canal.yaml

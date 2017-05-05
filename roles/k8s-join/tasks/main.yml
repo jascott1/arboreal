@@ -3,6 +3,6 @@
 # TODO use IP from host_vars
 - name: Join nodes to cluster
   become: True
-  become_user: ubuntu
-  command: sudo kubeadm join --token {{ token }} 172.16.35.11:6443
+  become_user: "{{ username }}"
+  command: sudo kubeadm join --token {{ token }} {{ api_advertise_ip }}:6443
 

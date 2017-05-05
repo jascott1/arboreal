@@ -2,7 +2,7 @@
 # general
 
 # the default for become_user operations (typically ubuntu on ubuntu)
-username: "{{ ansible_ssh_user }}"
+username: "{{ ansible_user }}"
 
 # kube
 token: c2d386.f79b2b89b6138441
@@ -10,7 +10,7 @@ pod_cidr: 10.1.0.0/16
 service_cidr: 10.3.3.0/24
 #node .10 of service_cidr (10.3.3.10)
 kube_dns_ip: 10.3.3.10
-api_advertise_ip: 172.16.35.11
+api_advertise_ip: 172.17.0.1
 
 
 # canal
@@ -18,5 +18,5 @@ canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.1.0.0
 
 ### kolla
-management_ip: "{{ api_advertise_ip }}" # 172.16.35.11 usually eth0 or equivalent
-neutron_iface: enp0s9 # a second interface for neutron
+management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
+neutron_iface: eth1 # a second interface for neutron

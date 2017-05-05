@@ -1,15 +1,13 @@
 ---
 
-## - hosts: all
+### - hosts: all
 - hosts: kube-masters
   gather_facts: false
-# become: yes
   roles:
     - k8s-all
 
 - hosts: kube-masters
-  gather_facts: false
-  #become: yes
+  gather_facts: true
   roles:
     - k8s-master
     - k8s-sdn
