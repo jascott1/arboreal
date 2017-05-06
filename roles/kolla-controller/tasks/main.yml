@@ -6,7 +6,6 @@
   package: name={{item}} state=latest
   become: True
   with_items:
-    #- epel-release
     - ansible
     - python-pip
     - python-dev
@@ -94,18 +93,17 @@
 
 - name: Copy default kolla configuration to etc
   become: True
-  #copy: src=/usr/share/kolla-ansible/etc_examples/kolla dest=/etc
   command: cp -aR /home/{{ username }}/kolla-ansible/etc/kolla /etc
 
 - name: Copy default kolla-kubernetes configuration to /etc
   become: True
-  #copy: src=/home/ubuntu/kolla-kubernetes/etc/kolla-kubernetes dest=/etc
   command: cp -aR /home/{{ username }}/kolla-kubernetes/etc/kolla-kubernetes /etc
 
 - name: Generate default passwords via SPRNG
   become: True
   become_user: "{{ username }}"
-  command: kolla-genpwd
+  #command: kolla-genpwd
+  command: kolla-kubernetes-genpwd
 
 # TODO Remove ignore errors
 - name: Create a kubernetes namespace to isolate this kolla deployment
@@ -210,10 +208,6 @@
   become_user: "{{ username }}"
   command: /home/{{ username }}/kolla-kubernetes/tools/helm_build_all.sh ~/.helm/repository/kolla
 
-# TODO implement
-#- name: Check that all helm images have been built by verifying the number is > 150
-#  command: # ls | grep ".tgz" | wc -l
-
 - set_fact:
       cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
 
@@ -296,7 +290,7 @@
 # TODO wait for nova-compute
 #- name: Wait for nova-compute the enter the running state before creating the cell0 database
 
-- name: Start kolla-kubernetes microservices part3
+- name: Start kolla-kubernetes microservices part2
   become: True
   become_user: "{{ username }}"
   command: helm install --debug kolla-kubernetes/helm/microservice/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml

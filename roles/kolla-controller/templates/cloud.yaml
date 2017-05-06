@@ -3,15 +3,15 @@ global:
      all:
        image_tag: "4.0.0"
        kube_logger: false
-       external_vip: "192.168.7.105"
-       base_distro: "centos"
-       install_type: "source"
+       external_vip: "{{ external_vip }}"
+       base_distro: "{{ base_distro }}"
+       install_type: "{{ install_type }}"
        tunnel_interface: "docker0"
        resolve_conf_net_host_workaround: true
      keystone:
        all:
          admin_port_external: "true"
-         dns_name: "192.168.7.105"
+         dns_name: "{{ dns_name }} "
        public:
          all:
            port_external: "true"
@@ -31,7 +31,7 @@ global:
            element_name: cinder-volume
          daemonset:
            lvm_backends:
-             - 192.168.7.105: cinder-volumes
+             - {{ cinder_lvm_ip }}: cinder-volumes
      ironic:
        conductor:
          daemonset:
