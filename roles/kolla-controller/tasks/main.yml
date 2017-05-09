@@ -37,12 +37,6 @@
   when:
     - ansible_os_family == 'RedHat'
 
-
-## TODO more ansible native
-#- name: Create kolla-bringup dir
-#  become: True
-#  command: mkdir /home/ubuntu/kolla-bringup
-
 - name: Clone kolla-ansible
   git:
     repo: 'http://github.com/openstack/kolla-ansible'
@@ -79,13 +73,6 @@
     mode: 0755
     recurse: yes
     state: directory
-
-# TODO add proper cherrypick w vanilla git
-# apply a cherrypick that fixes kollakube tool
-#cd kolla-kubernetes
-#git review -x 439740
-#cd ..
-# ALSO this one https://review.openstack.org/#/c/422803/
 
 - name: Install kolla-kubernetes
   become: True
@@ -146,9 +133,6 @@
     content: '{{ globals_config }}'
     state: present
     insertafter: EOF
-
-
-# TODO Might have to make dir
 
 - name: Make /etc/kolla/config
   become: True
@@ -279,10 +263,6 @@
   with_items:
     - nova-cell0-create-db-job
     - nova-api-create-simple-cell-job
-
-# TODO add wait for pods
-# Wiat for pods
-#watch -d -n 5 -c kubectl get pods --all-namespaces
 
 - name: Generate openrc file
   become: True
