@@ -147,6 +147,7 @@
       [libvirt]
       virt_type=qemu
       cpu_mode=none
+  become: True
 
 - name: Generate the default configuration
   become: True

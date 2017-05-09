@@ -20,6 +20,5 @@
 
 - hosts: kube-masters
   gather_facts: true
-  become: yes
   roles:
     - kolla-controller
