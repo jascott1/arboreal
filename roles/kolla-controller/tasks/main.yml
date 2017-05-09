@@ -102,7 +102,6 @@
 - name: Generate default passwords via SPRNG
   become: True
   become_user: "{{ username }}"
-  #command: kolla-genpwd
   command: kolla-kubernetes-genpwd
 
 # TODO Remove ignore errors
@@ -272,23 +271,6 @@
     - neutron
     - nova-control
     - nova-compute
-
-- name: Start kolla-kubernetes microservices part2
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/microservice/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
-  with_items:
-    - nova-placement-deployment
-    - nova-placement-create-keystone-user-job
-    - nova-placement-create-keystone-service-job
-    - nova-placement-svc
-    - nova-placement-create-keystone-endpoint-internal-job
-    - nova-placement-create-keystone-endpoint-admin-job
-    - nova-placement-create-keystone-endpoint-public-job
-  ignore_errors: True
-
-# TODO wait for nova-compute
-#- name: Wait for nova-compute the enter the running state before creating the cell0 database
 
 - name: Start kolla-kubernetes microservices part2
   become: True

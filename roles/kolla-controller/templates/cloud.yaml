@@ -11,7 +11,7 @@ global:
      keystone:
        all:
          admin_port_external: "true"
-         dns_name: "{{ dns_name }} "
+         dns_name: "{{ dns_name }}"
        public:
          all:
            port_external: "true"
@@ -31,7 +31,7 @@ global:
            element_name: cinder-volume
          daemonset:
            lvm_backends:
-             - {{ cinder_lvm_ip }}: cinder-volumes
+             - "{{ cinder_lvm_ip }}": cinder-volumes
      ironic:
        conductor:
          daemonset:
