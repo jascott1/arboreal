@@ -138,7 +138,7 @@
   become: True
   command: mkdir -p /etc/kolla/config/
 
-- name: enable QEMU libvirt functionality and enable a workaround for a bug in libvirt
+- name: Enable QEMU libvirt functionality and enable a workaround for a bug in libvirt
   blockinfile:
     dest: /etc/kolla/config/nova.conf
     state: present
