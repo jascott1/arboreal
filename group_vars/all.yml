@@ -1,8 +1,10 @@
 ---
 # general
 
-# the default for become_user operations (typically ubuntu on ubuntu)
+## the default for become_user operations (typically ubuntu on ubuntu)
 username: "{{ ansible_user }}"
+## Taint master- and label master as kolla-worker
+master_works: True
 
 # kube
 token: c2d386.f79b2b89b6138441
@@ -11,7 +13,6 @@ service_cidr: 10.3.3.0/24
 ## node .10 of service_cidr (10.3.3.10)
 kube_dns_ip: 10.3.3.10
 api_advertise_ip: 172.17.0.1
-
 
 # canal
 canal_dns_ip: 10.3.3.100

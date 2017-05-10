@@ -13,5 +13,4 @@ subjects:
   name: system:masters
 - kind: Group
   name: system:authenticated
-- kind: Group
-  name: system:unauthenticated
+

@@ -116,6 +116,8 @@
   become_user: "{{ username }}"
   command: kubectl label node {{ ansible_hostname }} kolla_compute=true
   ignore_errors: True
+  when:
+    - master_works == True
 
 # TODO implement
 #- name: Modify kolla configuration
@@ -168,115 +170,8 @@
   become_user: "{{ username }}"
   ignore_errors: True
 
-# TODO remove ignore errors
-- name: Create and register the Kolla config maps
-  become: True
-  become_user: "{{ username }}"
-  command: |
-    kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived \
-    placement-api placement-api-haproxy
-  ignore_errors: True
+- include: deploy-kolla-k8s.yml
 
-
-
-- name: Build all helm microcharts, service charts, and metacharts
-  become: True
-  become_user: "{{ username }}"
-  command: /home/{{ username }}/kolla-kubernetes/tools/helm_build_all.sh ~/.helm/repository/kolla
-
-- set_fact:
-      cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
-
-- name: Create a cloud.yaml file for the deployment of the charts
-  blockinfile:
-    dest: /home/{{ username }}/cloud.yaml
-    content: '{{ cloud_yaml }}'
-    state: present
-    create: yes
-
-- name: Replace all occurances of 192.168.7.105 with the IP your management interface nic
-  replace:
-    dest: /home/{{ username }}/cloud.yaml
-    regexp: '192.168.7.105'
-    replace: "{{ management_ip }}"
-
-- name: Replace all occurances of enp1s0f1 with your neutron interface name (e.g. enp1s0f1)
-  replace:
-    dest: /home/{{ username }}/cloud.yaml
-    regexp: '1enp1s0f1'
-    replace: "{{ neutron_iface }}"
-
-# TODO change to poll for tiller, from init Tiller takes ~4min on vbox
-- name: Wait on Tiller for 60 secs
-  wait_for:
-    timeout: 60
-
-# TODO fix yaml path
-- name: Start mariadb first and wait for it to enter the RUNNING state
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
-
-# TODO change to poll for db
-- name: Wait on mariadb for 120 secs
-  wait_for:
-    timeout: 120
-
-- name: Start kolla-kubernetes services part1
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/service/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
-  with_items:
-    - rabbitmq
-    - memcached
-    - keystone
-    - glance
-    - cinder-control
-
-- name: Start kolla-kubernetes microservices part1
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/microservice/cinder-volume-lvm-daemonset --namespace kolla --name cinder-volume --values ./cloud.yaml
-
-- name: Start kolla-kubernetes services part2
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/service/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
-  with_items:
-    - horizon
-    - openvswitch
-    - neutron
-    - nova-control
-    - nova-compute
-
-- name: Start kolla-kubernetes microservices part2
-  become: True
-  become_user: "{{ username }}"
-  command: helm install --debug kolla-kubernetes/helm/microservice/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
-  with_items:
-    - nova-cell0-create-db-job
-    - nova-api-create-simple-cell-job
-
-- name: Generate openrc file
-  become: True
-  become_user: "{{ username }}"
-  command: kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext
-
-- name: Install openstack clients
-  become: True
-  command: pip install {{ item }}
-  with_items:
-    - python-openstackclient
-    - python-neutronclient
-    - python-cinderclient
 
 
 #- name: Bootstrap the cloud envrionment and create a VM as requested

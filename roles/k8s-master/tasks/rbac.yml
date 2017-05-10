@@ -4,7 +4,7 @@
 
 - name: Copy RBAC file
   template:
-    src: rbac.yml
+    src: rbac.yml.tpl
     dest: /tmp/rbac.yml
     mode: 0644
 
@@ -17,3 +17,5 @@
   become: True
   become_user: "{{ username }}"
   command: kubectl taint nodes {{ ansible_hostname }} node-role.kubernetes.io/master-
+  when:
+    - master_works == True
