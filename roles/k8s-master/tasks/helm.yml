@@ -11,6 +11,4 @@
   command: /tmp/get_helm.sh
 
 - name: Run Helm Init
-  become: True
-  become_user: "{{ username }}"
   command: helm init

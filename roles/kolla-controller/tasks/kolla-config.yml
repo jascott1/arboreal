@@ -2,6 +2,7 @@
 
 # Kolla-Kubernetes Configuration
 
+# Note: Ansible remote-src copy does not recurse dirs, hence using cp
 - name: Copy default kolla configuration to etc
   become: True
   command: cp -aR /home/{{ username }}/kolla-ansible/etc/kolla /etc
@@ -11,14 +12,10 @@
   command: cp -aR /home/{{ username }}/kolla-kubernetes/etc/kolla-kubernetes /etc
 
 - name: Generate default passwords via SPRNG
-  become: True
-  become_user: "{{ username }}"
   command: kolla-kubernetes-genpwd
 
 # TODO Remove ignore errors
 - name: Create a kubernetes namespace to isolate this kolla deployment
-  become: True
-  become_user: "{{ username }}"
   command: kubectl create namespace kolla
   ignore_errors: True
 
@@ -29,15 +26,11 @@
 
 # TODO Remove ignore errors
 - name: Label the master node as the controller node
-  become: True
-  become_user: "{{ username }}"
   command: kubectl label node {{ ansible_hostname }} kolla_controller=true
   ignore_errors: True
 
 # TODO Remove ignore errors
 - name: Label the master node a compute node
-  become: True
-  become_user: "{{ username }}"
   command: kubectl label node {{ ansible_hostname }} kolla_compute=true
   ignore_errors: True
   when:
@@ -76,20 +69,14 @@
   become: True
 
 - name: Generate the default configuration
-  become: True
-  become_user: "{{ username }}"
   command: sudo ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla kolla-kubernetes/ansible/site.yml
 
 # TODO remove ignore errors
 - name: Generate the Kubernetes secrets and register them with Kubernetes
-  become: True
-  become_user: "{{ username }}"
   command: /home/{{ username }}/kolla-kubernetes/tools/secret-generator.py create
   ignore_errors: True
 
 # TODO remove ignore errors currently needed for re-running task
 - name: Enable resolv.conf workaround
   command: /home/{{ username }}/kolla-kubernetes/tools/setup-resolv-conf.sh kolla
-  become: True
-  become_user: "{{ username }}"
   ignore_errors: True

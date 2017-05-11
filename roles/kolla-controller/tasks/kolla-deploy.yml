@@ -4,8 +4,6 @@
 
 # TODO remove ignore errors
 - name: Create and register the Kolla config maps
-  become: True
-  become_user: "{{ username }}"
   command: |
     kollakube res create configmap \
     mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
@@ -22,8 +20,6 @@
 
 
 - name: Build all helm microcharts, service charts, and metacharts
-  become: True
-  become_user: "{{ username }}"
   command: /home/{{ username }}/kolla-kubernetes/tools/helm_build_all.sh ~/.helm/repository/kolla
 
 - set_fact:
@@ -54,8 +50,6 @@
     timeout: 60
 
 - name: Start kolla-kubernetes services part1
-  become: True
-  become_user: "{{ username }}"
   command: helm install --debug kolla-kubernetes/helm/service/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
   with_items:
     - mariadb
@@ -66,13 +60,9 @@
     - cinder-control
 
 - name: Start kolla-kubernetes microservices part1
-  become: True
-  become_user: "{{ username }}"
   command: helm install --debug kolla-kubernetes/helm/microservice/cinder-volume-lvm-daemonset --namespace kolla --name cinder-volume --values ./cloud.yaml
 
 - name: Start kolla-kubernetes services part2
-  become: True
-  become_user: "{{ username }}"
   command: helm install --debug kolla-kubernetes/helm/service/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
   with_items:
     - horizon
@@ -82,8 +72,6 @@
     - nova-compute
 
 - name: Start kolla-kubernetes microservices part2
-  become: True
-  become_user: "{{ username }}"
   command: helm install --debug kolla-kubernetes/helm/microservice/{{ item }} --namespace kolla --name {{ item }} --values ./cloud.yaml
   with_items:
     - nova-cell0-create-db-job

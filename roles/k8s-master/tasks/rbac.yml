@@ -9,13 +9,7 @@
     mode: 0644
 
 - name: Override default RBAC settings
-  become: True
-  become_user: "{{ username }}"
   command: kubectl replace -f /tmp/rbac.yml
 
 - name: Remove master taint
-  become: True
-  become_user: "{{ username }}"
   command: kubectl taint nodes {{ ansible_hostname }} node-role.kubernetes.io/master-
-  when:
-    - master_works == True

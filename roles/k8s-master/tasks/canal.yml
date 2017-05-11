@@ -25,11 +25,7 @@
     replace: "{{ canal_dns_ip }}"
 
 - name: Kubectl create RBAC (canal)
-  become: True
-  become_user: "{{ username }}"
   command: kubectl create -f /tmp/rbac.yaml
 
 - name: Kubectl create canal
-  become: True
-  become_user: "{{ username }}"
   command: kubectl create -f /tmp/canal.yaml

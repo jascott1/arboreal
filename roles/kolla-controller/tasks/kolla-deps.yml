@@ -42,37 +42,10 @@
     repo: 'http://github.com/openstack/kolla-ansible'
     dest: /home/{{ username }}/kolla-ansible
 
-- name: Chown kolla-ansible
-  file:
-    path: /home/{{ username }}/kolla-ansible
-    owner: "{{ username }}"
-    group: "{{ username }}"
-    mode: 0755
-    recurse: yes
-    state: directory
-
 - name: Clone kolla-kubernetes
   git:
     repo: 'http://github.com/openstack/kolla-kubernetes'
     dest: /home/{{ username }}/kolla-kubernetes
-
-- name: Chown kolla-kubernetes
-  file:
-    path: /home/{{ username }}/kolla-kubernetes
-    owner: "{{ username }}"
-    group: "{{ username }}"
-    mode: 0755
-    recurse: yes
-    state: directory
-
-- name: Chown .kube
-  file:
-    path: /home/{{ username }}/.kube
-    owner: "{{ username }}"
-    group: "{{ username }}"
-    mode: 0755
-    recurse: yes
-    state: directory
 
 - name: Install kolla-kubernetes
   become: True
