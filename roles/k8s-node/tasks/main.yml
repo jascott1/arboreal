@@ -1,6 +1,6 @@
 ---
 
-# TODO use IP from host_vars
+# TODO test and enable
 - name: Join nodes to cluster
   become: True
   become_user: "{{ username }}"

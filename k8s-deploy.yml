@@ -2,7 +2,7 @@
 
 ### - hosts: all
 - hosts: kube-masters
-  gather_facts: false
+  gather_facts: true
   roles:
     - k8s-all
 
