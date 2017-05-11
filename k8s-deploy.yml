@@ -21,4 +21,4 @@
   gather_facts: true
   roles:
     - kolla-controller
-    - openstack-client
+    - openstack-extra
