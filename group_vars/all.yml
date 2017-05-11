@@ -13,6 +13,7 @@ service_cidr: 10.3.3.0/24
 ## node .10 of service_cidr (10.3.3.10)
 kube_dns_ip: 10.3.3.10
 api_advertise_ip: 172.17.0.1
+kube_version: 1.6.2
 
 # canal
 canal_dns_ip: 10.3.3.100

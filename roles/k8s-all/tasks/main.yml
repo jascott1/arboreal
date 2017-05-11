@@ -64,9 +64,9 @@
   become: True
   with_items:
     - docker.io
-    - kubelet
-    - kubeadm
-    - kubectl
+    - kubelet={{ kube_version }}-00
+    - kubeadm={{ kube_version }}-00
+    - kubectl={{ kube_version }}-00
     - kubernetes-cni
     - ebtables
   when:
@@ -92,9 +92,9 @@
     update_cache: True
   with_items:
     - docker
-    - kubelet
-    - kubeadm
-    - kubectl
+    - kubelet-{{ kube_version }}
+    - kubeadm-{{ kube_version }}
+    - kubectl-{{ kube_version }}
     - kubernetes-cni
     - ebtables
     - git
