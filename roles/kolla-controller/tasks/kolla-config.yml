@@ -14,34 +14,29 @@
 - name: Generate default passwords via SPRNG
   command: kolla-kubernetes-genpwd
 
-# TODO Remove ignore errors
 - name: Create a kubernetes namespace to isolate this kolla deployment
   command: kubectl create namespace kolla
   ignore_errors: True
 
-# TODO move to node also
-#- name: Label the AIO node as the compute and controller node:
-#  kubectl label node $(hostname) kolla_compute=true
-#  kubectl label node $(hostname) kolla_controller=true
-
-# TODO Remove ignore errors
 - name: Label the master node as the controller node
   command: kubectl label node {{ ansible_hostname }} kolla_controller=true
   ignore_errors: True
 
-# TODO Remove ignore errors
 - name: Label the master node a compute node
   command: kubectl label node {{ ansible_hostname }} kolla_compute=true
   ignore_errors: True
   when:
     - master_works == True
 
-# TODO implement
-#- name: Modify kolla configuration
-#set network_interface in /etc/kolla/globals.yaml to the management interface name.
-#set neutron_external_interface in /etc/kolla/globals.yml to the Neutron interface name.
-#This is the external interface that neutron will use.  It must not have an IP
-#address assigned to it.
+# TODO Remove after worker label below is solved
+#- name: Log Hostvars
+#  debug: msg="{{ hostvars }}"
+
+# TODO Fix this: Get list of nodes and label them compute
+#- name: Label the worker node a compute node
+#  command: kubectl label node "{{ item }}" kolla_compute=true
+#  with_items: groups.kube-workers
+#  ignore_errors: True
 
 - set_fact:
       globals_config: "{{ lookup('template', 'templates/globals_config.j2') }}"
@@ -53,9 +48,24 @@
     state: present
     insertafter: EOF
 
-- name: Make /etc/kolla/config
+- name: Set network_interface in globals.yaml
+  lineinfile:
+    dest: /etc/kolla/globals.yml
+    line: "network_interface: {{ management_iface }}"
+    regexp: "^(.*)network_interface:(.*)$"
   become: True
-  command: mkdir -p /etc/kolla/config/
+
+- name: Set neutron_external_interface in globals.yaml
+  lineinfile:
+    dest: /etc/kolla/globals.yml
+    line: "neutron_external_interface: {{ neutron_iface }}"
+    regexp: "^(.*)neutron_external_interface:(.*)$"
+  become: True
+
+- file:
+    path: /etc/kolla/config/
+    state: directory
+    mode: 0755
 
 - name: Enable QEMU libvirt functionality and enable a workaround for a bug in libvirt
   blockinfile:

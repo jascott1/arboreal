@@ -22,6 +22,7 @@ canal_pod_network: 10.1.0.0
 # kolla
 base_distro: "centos"
 install_type: "source"
+management_iface: eth0
 management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
 neutron_iface: eth1 # a second interface for neutron
 external_vip: 192.168.7.105

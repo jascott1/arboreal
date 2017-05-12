@@ -1,5 +1,5 @@
 ---
-# TODO Add RBAC,AlwaysAllow to increase security to completely open from insanely open
+
 apiVersion: rbac.authorization.k8s.io/v1alpha1
 kind: ClusterRoleBinding
 metadata:

@@ -17,13 +17,11 @@
     placement-api placement-api-haproxy
   ignore_errors: True
 
-
-
 - name: Build all helm microcharts, service charts, and metacharts
   command: /home/{{ username }}/kolla-kubernetes/tools/helm_build_all.sh ~/.helm/repository/kolla
 
 - set_fact:
-      cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
+    cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
 
 - name: Create a cloud.yaml file for the deployment of the charts
   blockinfile:

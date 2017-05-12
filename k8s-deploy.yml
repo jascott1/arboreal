@@ -1,6 +1,6 @@
 ---
 
-### - hosts: all
+#- hosts: all
 - hosts: kube-masters
   gather_facts: true
   roles:
@@ -15,7 +15,7 @@
 #  gather_facts: false
 #  become: yes
 #  roles:
-#    - k8s-join
+#    - k8s-node
 
 - hosts: kube-masters
   gather_facts: true
