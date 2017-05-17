@@ -28,15 +28,18 @@
   when:
     - master_works == True
 
-# TODO Remove after worker label below is solved
-#- name: Log Hostvars
-#  debug: msg="{{ hostvars }}"
+# TODO Filter out master, add condition
+- name: Get Node List
+  shell: kubectl get nodes -o name | cut -d/ -f2
+  register: node_list
 
 # TODO Fix this: Get list of nodes and label them compute
-#- name: Label the worker node a compute node
-#  command: kubectl label node "{{ item }}" kolla_compute=true
-#  with_items: groups.kube-workers
-#  ignore_errors: True
+- name: Label the worker node a compute node
+  shell: kubectl label node "{{ item }}" kolla_compute=true
+  with_items: "{{ node_list.stdout.split('\n') }}"
+  ignore_errors: True
+
+
 
 - set_fact:
       globals_config: "{{ lookup('template', 'templates/globals_config.j2') }}"

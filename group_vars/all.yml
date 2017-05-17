@@ -12,7 +12,8 @@ pod_cidr: 10.1.0.0/16
 service_cidr: 10.3.3.0/24
 ## node .10 of service_cidr (10.3.3.10)
 kube_dns_ip: 10.3.3.10
-api_advertise_ip: 172.17.0.1
+## typically change this to your master's eth0 ip
+api_advertise_ip: 10.0.0.5
 kube_version: 1.6.2
 
 # canal
@@ -22,9 +23,11 @@ canal_pod_network: 10.1.0.0
 # kolla
 base_distro: "centos"
 install_type: "source"
-management_iface: eth0
+## change this to eth0 equivalent
+management_iface: ens3
 management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
-neutron_iface: eth1 # a second interface for neutron
+## a second interface for neutron, typically without an ip
+neutron_iface: ens4
 external_vip: 192.168.7.105
 dns_name: 192.168.7.105
 cinder_lvm_ip: 192.168.7.105
