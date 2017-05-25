@@ -3,7 +3,7 @@ variable "prefix" {
   default = "ops"
 }
 variable "node-count" {
-  default = 3
+  default = 1
 }
 variable "internal-ip-pool" {}
 variable "floating-ip-pool" {}
@@ -23,29 +23,6 @@ variable "user" {
 }
 
 provider "aws" {}
-
-/*resource "aws_vpc" "k8s-vpc" {
-  cidr_block = "172.16.0.0/16"
-  tags {
-    Name = "k8s-vpc"
-  }
-}
-
-resource "aws_subnet" "k8s-subnet" {
-  vpc_id = "${aws_vpc.k8s-vpc.id}"
-  cidr_block = "172.16.10.0/24"
-  availability_zone = "us-west-2a"
-  tags {
-    Name = "k8s-subnet"
-  }
-}*/
-//variable "vpc_id" {
-//  default = "vpc-b5f3cfd2"
-//}
-//
-//data "aws_vpc" "selected" {
-//  id = "${var.vpc_id}"
-//}
 
 # Create a VPC to launch our instances into
 resource "aws_vpc" "k8s" {
@@ -74,30 +51,30 @@ resource "aws_subnet" "k8s" {
   vpc_id                  = "${aws_vpc.k8s.id}"
   availability_zone       = "us-west-2a"
   cidr_block              = "${aws_vpc.k8s.cidr_block}"
+  #cidr_block              = "172.30.1.0/24"
   map_public_ip_on_launch = true
 
 }
 
-//resource "aws_subnet" "k8s-subnet" {
-//  vpc_id            = "${data.aws_vpc.selected.id}"
-//  availability_zone = "us-west-2a"
-//  cidr_block        = "${cidrsubnet(data.aws_vpc.selected.cidr_block, 4, 1)}"
-//  map_public_ip_on_launch = true
-//
-//}
-
-//resource "aws_network_interface" "eth0" {
-//  subnet_id = "${aws_subnet.k8s.id}"
-//  #private_ips = ["172.16.10.100"]
-//  tags {
-//    Name = "primary_network_interface"
-//  }
-//}
+resource "aws_network_interface" "eth0" {
+  subnet_id = "${aws_subnet.k8s.id}"
+  security_groups = ["${aws_security_group.k8s.id}"]
+  tags {
+    Name = "primary_network_interface"
+  }
+}
+resource "aws_network_interface" "eth1" {
+  subnet_id = "${aws_subnet.k8s.id}"
+  security_groups = ["${aws_security_group.k8s.id}"]
+  tags {
+    Name = "secondary_network_interface"
+  }
+}
 variable "ubuntu_ami_id"{
   default = "ami-efd0428f"
 }
 variable "centos_ami_id"{
-  default = "ami-571e3c30"
+  default = "ami-0c2aba6c"
 }
 resource "null_resource" "ref" {
   triggers = {
@@ -136,36 +113,62 @@ resource "null_resource" "ref" {
 //
 //
 //}
+# A security group that makes the instances accessible
+resource "aws_security_group" "k8s" {
+  name = "k8s-default"
+  vpc_id      = "${aws_vpc.k8s.id}"
 
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 resource "aws_instance" "k8s-master" {
   ami           = "${null_resource.ref.triggers.image-id}"
   instance_type = "t2.large"
 
-  tags {
-    Name = "jascott1-dev-ubuntu"
-  }
   root_block_device {
     volume_size = 20
   }
-//  network_interface {
-//    network_interface_id = "${aws_network_interface.eth0.id}"
-//    device_index = 0
-//  }
-  subnet_id              = "${aws_subnet.k8s.id}"
+  network_interface {
+    network_interface_id = "${aws_network_interface.eth0.id}"
+    device_index = 0
+  }
+  network_interface {
+    network_interface_id = "${aws_network_interface.eth1.id}"
+    device_index = 1
+  }
   key_name = "jascott1-aws"
 }
-//resource "aws_eip" "lb" {
-//  instance = "${aws_instance.k8s-master.id}"
-//  vpc      = true
-//}
-//data "aws_eip" "proxy_ip" {
-//
-//}
 
 resource aws_eip_association "proxy_eip" {
-  instance_id   = "${aws_instance.k8s-master.id}"
-  #allocation_id = "${data.aws_eip.proxy_ip.id}"
+  network_interface_id = "${aws_network_interface.eth0.id}"
   allocation_id = "eipalloc-4991f873"
+  allow_reassociation = true
+}
+
+resource "aws_instance" "k8s-node" {
+  #count = "${var.node-count}"
+  count = 1
+  ami           = "${null_resource.ref.triggers.image-id}"
+  instance_type = "t2.large"
+
+  root_block_device {
+    volume_size = 20
+  }
+  //vpc_security_group_ids = ["${aws_security_group.k8s.id}"]
+  security_groups = ["${aws_security_group.k8s.id}"]
+  subnet_id = "${aws_subnet.k8s.id}"
+  key_name = "jascott1-aws"
 }
 /*
 # Image references

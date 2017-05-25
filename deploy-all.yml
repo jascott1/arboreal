@@ -1,0 +1,27 @@
+---
+
+- include: deploy-k8s.yml
+- include: deploy-kolla.yml
+
+#- hosts: all
+##- hosts: kube-masters
+#  gather_facts: true
+#  roles:
+#    - k8s-all
+#
+#- hosts: kube-masters
+#  gather_facts: true
+#  roles:
+#    - k8s-master
+#
+#- hosts: kube-masters
+#  gather_facts: true
+#  roles:
+#    - kolla-controller
+#    - openstack-extra
+#
+#- hosts: kube-workers
+#  gather_facts: false
+#  become: yes
+#  roles:
+#    - k8s-node

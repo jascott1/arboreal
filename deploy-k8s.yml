@@ -1,0 +1,18 @@
+---
+
+- hosts: all
+#- hosts: kube-masters
+  gather_facts: true
+  roles:
+    - k8s-all
+
+- hosts: kube-masters
+  gather_facts: true
+  roles:
+    - k8s-master
+
+#- hosts: kube-workers
+#  gather_facts: false
+#  become: yes
+#  roles:
+#    - k8s-node
