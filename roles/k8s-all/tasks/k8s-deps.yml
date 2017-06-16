@@ -36,7 +36,6 @@
     update_cache: True
   become: True
   with_items:
-    - docker.io
     - kubelet={{ kube_version }}-00
     - kubeadm={{ kube_version }}-00
     - kubectl={{ kube_version }}-00

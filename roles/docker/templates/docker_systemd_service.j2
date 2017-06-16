@@ -1,0 +1,4 @@
+[Service]
+MountFlags=shared
+ExecStart=
+ExecStart=/usr/bin/docker daemon{% if docker_registry %} --insecure-registry {{ docker_registry }}{% endif %}
