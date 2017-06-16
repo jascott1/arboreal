@@ -1,0 +1,50 @@
+---
+- name: Ensure apt sources list directory exists
+  file: path=/etc/apt/sources.list.d state=directory recurse=yes
+  become: True
+
+- name: Enable docker repo apt
+  template:
+    src: docker_apt_repo.j2
+    dest: /etc/apt/sources.list.d/docker.list
+  become: True
+
+- name: Install docker apt gpg key
+  apt_key:
+    url: "{{ docker_apt_url }}/gpg"
+    id: "{{ docker_apt_key_id }}"
+    state: present
+  become: True
+
+- name: Update apt cache
+  command: apt-get update
+  become: True
+
+- name: Install apt packages
+  apt: name={{item}} state=present
+  become: True
+  with_items: "{{ debian_pkg_install }}"
+
+- name: Ensure docker service directory exists
+  file:
+    path=/etc/systemd/system/docker.service.d
+    state=directory
+    recurse=yes
+  become: True
+
+- name: Configure docker service
+  become: True
+  template:
+    src=docker_systemd_service.j2
+    dest=/etc/systemd/system/docker.service.d/kolla.conf
+
+- name: Reload docker service file
+  become: True
+  command: systemctl daemon-reload
+
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted
+  become: True
+

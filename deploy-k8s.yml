@@ -3,15 +3,18 @@
 - hosts: all
   gather_facts: true
   roles:
+    - docker
     - k8s-all
 
 - hosts: kube-masters
   gather_facts: true
   roles:
     - k8s-master
+    - kubectl-local
 
 - hosts: kube-workers
   gather_facts: false
   become: yes
   roles:
     - k8s-node
+

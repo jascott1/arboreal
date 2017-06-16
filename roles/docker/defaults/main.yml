@@ -1,0 +1,9 @@
+---
+docker_apt_url: "https://apt.dockerproject.org"
+docker_apt_key_id: F76221572C52609D
+
+docker_registry: "192.168.204.9:5000"
+
+debian_pkg_install:
+  - docker-engine=1.13.*
+  - ntp

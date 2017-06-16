@@ -1,0 +1,4 @@
+*.swp
+*.tfstate*
+*.retry
+k8s-inventory
