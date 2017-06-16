@@ -101,11 +101,11 @@ resource "openstack_compute_floatingip_associate_v2" "master-fip-assoc" {
 }
 
 ##Create desired number of k8s nodes and floating IPs
-//resource "openstack_compute_floatingip_v2" "node-ip" {
-//  pool = "${var.floating-ip-pool}"
-//  count = "${var.node-count}"
-//}
-//
+resource "openstack_compute_floatingip_v2" "node-ip" {
+  pool = "${var.floating-ip-pool}"
+  count = "${var.node-count}"
+}
+
 resource "openstack_compute_instance_v2" "k8s-node" {
   count = "${var.node-count}"
   name = "${var.prefix}-k8s-node-${count.index}"
@@ -117,5 +117,5 @@ resource "openstack_compute_instance_v2" "k8s-node" {
     name = "${var.internal-ip-pool}"
   }
   user_data = "#!/bin/bash\nsudo yum install -y python python-simplejson || (apt-get update && apt-get install -y python2.7 python-simplejson)"
-  //floating_ip = "${element(openstack_compute_floatingip_v2.node-ip.*.address, count.index)}"
+  floating_ip = "${element(openstack_compute_floatingip_v2.node-ip.*.address, count.index)}"
 }
