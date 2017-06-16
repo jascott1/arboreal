@@ -1,0 +1,32 @@
+---
+- set_fact:
+    kube_master_ip: "{{ hostvars[groups['kube-masters'][0]]['inventory_hostname'] }}"
+
+- name: Set insecure address
+  become: true
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    insertafter: '.*insecure-port.*'
+    line: '    - --insecure-bind-address=0.0.0.0'
+
+- name: Set insecure port
+  become: true
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    regexp: '.*insecure-port.*'
+    line: '    - --insecure-port=8080'
+
+- service:
+    name: kubelet
+    state: restarted
+  become: true
+
+- name: Fetching kubectl conf
+  fetch:
+    src: ~/.kube/config
+    dest: ~/.kube/
+    flat: true
+
+-  name: Change ip
+   local_action: command sed -i -e 's/https:\/\/{{ api_advertise_ip }}:6443/http:\/\/{{ kube_master_ip }}:8080/g' ~/.kube/config
+
