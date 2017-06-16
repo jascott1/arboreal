@@ -5,12 +5,16 @@
     url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml
     dest: /tmp/canal.yaml
     mode: 0664
+  register:
+    canal_downloaded
 
 - name: Get rbac.yaml
   get_url:
     url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml
     dest: /tmp/rbac.yaml
     mode: 0664
+  register:
+    rbac_downloaded
 
 - name: Replace canal network IP
   replace:
@@ -26,6 +30,9 @@
 
 - name: Kubectl create RBAC (canal)
   command: kubectl create -f /tmp/rbac.yaml
+  when: rbac_downloaded.changed
 
 - name: Kubectl create canal
   command: kubectl create -f /tmp/canal.yaml
+  when: canal_downloaded.changed
+

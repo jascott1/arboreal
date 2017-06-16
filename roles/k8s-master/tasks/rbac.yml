@@ -13,3 +13,4 @@
 
 - name: Remove master taint
   command: kubectl taint nodes {{ ansible_hostname }} node-role.kubernetes.io/master-
+  when: kubeadm_init_out.changed

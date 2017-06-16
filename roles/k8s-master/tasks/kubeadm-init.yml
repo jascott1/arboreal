@@ -1,20 +1,31 @@
 ---
+- name: Check if kubeadm was already run
+  stat:
+    path: "/var/lib/etcd"
+  register:
+    etcd_dir
+
+- debug:
+    msg: "{{ etcd_dir }}"
 
 - name: Kubeadm init
   become: True
   command: kubeadm init --pod-network-cidr="{{ pod_cidr }}" --service-cidr="{{ service_cidr }}" --token {{ token }} --apiserver-advertise-address={{ api_advertise_ip }}
   register: kubeadm_init_out
+  when: not etcd_dir.stat.exists
 
 - name: Log Kubeadm init
   debug: msg="{{ kubeadm_init_out }}"
+  when: kubeadm_init_out.changed
+
 
 - name: Creates directory
   file: path=.kube state=directory
 
 # Note ansible `copy` doesn't work here because of root privilege required for /etc
--  name: Copy admin.conf to ~/.kube/config
-   command: cp /etc/kubernetes/admin.conf /home/{{ username }}/.kube/config
-   become: True
+- name: Copy admin.conf to ~/.kube/config
+  command: cp /etc/kubernetes/admin.conf /home/{{ username }}/.kube/config
+  become: True
 
 - name: Chown .kube/config
   become: True
