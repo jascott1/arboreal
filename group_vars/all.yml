@@ -16,6 +16,7 @@ kube_dns_ip: 10.3.3.10
 api_advertise_ip: 10.0.0.5
 kube_version: 1.6.2
 
+network_driver: 'weave'  # canal or weave
 # canal
 canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.1.0.0
