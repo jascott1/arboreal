@@ -1,5 +1,5 @@
 prefix="jascott1"
-node-count="1"
+node-count="3"
 internal-ip-pool="demo-net"
 floating-ip-pool="public1"
 image-name="ubuntu-16.04"
