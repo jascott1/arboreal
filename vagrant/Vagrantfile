@@ -1,88 +1,106 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
+# currently provisions 1 master and {node_count} nodes (default 2)
+
+# master
+master_memory=2048
+master_name="node-0"
+
+# nodes
+node_name_prefix="node"
+node_count=2
+node_memory=1024
+
+groups = {}
+groups["k8s-cluster"] = []
+
 Vagrant.configure("2") do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
+    config.vm.boot_timeout = 600
+    # master treated separately
+    config.vm.define "#{master_name}" do |node|
+      groups["kube-masters"] = "node-0"
+      groups["k8s-cluster"].push("node-0")
+      node.vm.box = "ubuntu/xenial64"
+      node.vm.hostname = "#{master_name}"
+      # config.vm.box_check_update = false
+      #node.vm.network "forwarded_port", guest: 6443, host: 6443
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "ubuntu/xenial64"
+      node.vm.network "private_network", ip: "172.168.1.100", auto_config: true
+      node.vm.network "public_network", ip: "192.168.1.100", auto_config: true, bridge: "bridge0"
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
+      # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-   config.vm.network "forwarded_port", guest: 6443, host: 6443 
+      node.vm.provider "virtualbox" do |vb|
+        # Display the VirtualBox GUI when booting the machine
+        vb.gui = false
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+        # Customize the amount of memory on the VM:
+        vb.memory = "#{master_memory}"
 
-  config.vm.network "private_network", ip: "172.168.1.100", auto_config: true
-  config.vm.network "public_network", ip: "192.168.1.100", auto_config: true, bridge: "bridge0"
+      end
+        # shell commands to run on each machine
+       node.vm.provision "shell", inline: <<-SHELL
+         apt-get update
+         apt-get install -y python2.7
+         ln -s /usr/bin/python2.7 /usr/bin/python
+       SHELL
+    end
+    # rest of nodes
+    if node_count > 0
+        (1..node_count).each do |i|
+          config.vm.define "node-#{i}" do |node|
+              node.vm.box = "ubuntu/xenial64"
+              node.vm.hostname = "#{node_name_prefix}-#{i}"
+              # config.vm.box_check_update = false
+              #node.vm.network "forwarded_port", guest: 6443, host: 6443
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+              node.vm.network "private_network", ip: "172.168.1.#{i + 100}", auto_config: true
+              node.vm.network "public_network", ip: "192.168.1.#{i + 100}", auto_config: true, bridge: "bridge0"
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+              # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  config.vm.provider "virtualbox" do |vb|
-    # Display the VirtualBox GUI when booting the machine
-    vb.gui = false
+              node.vm.provider "virtualbox" do |vb|
+                # Display the VirtualBox GUI when booting the machine
+                vb.gui = false
 
-    # Customize the amount of memory on the VM:
-    vb.memory = "2048"
-    
-  end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
+                # Customize the amount of memory on the VM:
+                vb.memory = "#{node_memory}"
 
-  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
-  # such as FTP and Heroku are also available. See the documentation at
-  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
-  # config.push.define "atlas" do |push|
-  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
-  # end
+              end
+                # shell commands to run on each machine
+               node.vm.provision "shell", inline: <<-SHELL
+                 apt-get update
+                 apt-get install -y python2.7
+                 ln -s /usr/bin/python2.7 /usr/bin/python
+               SHELL
+               
+              groups["k8s-cluster"].push("node-#{i}")
+              if groups.has_key?("kube-workers")
+                  groups["kube-workers"].push("node-#{i}")
+              else
+                groups["kube-workers"] = []
+                groups["kube-workers"].push("node-#{i}")
+              end
+            end
+        end
+    end
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-   config.vm.provision "shell", inline: <<-SHELL
-     apt-get update
-     apt-get install -y python2.7
-   SHELL
+    # other groups
 
-  #
-  # Run Ansible from the Vagrant Host
-  #
-  #config.vm.provision "ansible" do |ansible|
-  #  ansible.playbook = "/Users/jascott1/projects/arboreal/k8s-deploy.yml"
-  #  ansible.groups = {
-  #        "k8s-master" => ["kube1"],
+    groups["k8s-cluster:vars"] = {
+            "ansible_user" => "ubuntu",
+            "ansible_python_interpreter" => "/usr/bin/python2.7",
+            "ansible_ssh_private_key_file" => "/Users/jascott1/.ssh/jascott1-sc",
+    }
 
-  #     }
-  #end
+#    groups["kube-control:children"] = ["node-0"]
 
+    groups["kube-control:children"] = []
+    groups["kube-control:children"].push("node-0")
 
+    config.vm.provision "ansible" do |ansible|
+        ansible.groups = groups
+        ansible.playbook = "empty.yaml"
+    end
 end
