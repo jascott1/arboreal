@@ -30,3 +30,9 @@ After the VMs are created, execute the following command to install Kubernetes:
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory ../deploy-k8s.yml
 ```
 
+To download the remote kubernetes config and overwrite your local .kube/config, execute the following command:
+
+```
+./k8s-config.sh node-0
+
+```
