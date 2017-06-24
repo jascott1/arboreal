@@ -12,8 +12,9 @@
     - k8s-master
     - kubectl-local
 
-- hosts: kube-workers
-  gather_facts: false
+# this is limited in the role to only worker nodes, allows node to get master ip
+- hosts: all
+  gather_facts: true
   become: yes
   roles:
     - k8s-node

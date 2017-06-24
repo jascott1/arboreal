@@ -1,6 +1,13 @@
 ---
+
+- name: start kubectl-local
+  debug: msg="Starting kubectl-local start"
+
+- include: ../k8s-all/tasks/advertise-ip.yml
+
 - set_fact:
     kube_master_ip: "{{ hostvars[groups['kube-masters'][0]]['inventory_hostname'] }}"
+
 
 - name: Set insecure address
   become: true

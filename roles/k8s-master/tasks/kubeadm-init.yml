@@ -1,4 +1,7 @@
 ---
+
+- include: ../k8s-all/tasks/advertise-ip.yml
+
 - name: Check if kubeadm was already run
   stat:
     path: "/var/lib/etcd"

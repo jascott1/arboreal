@@ -1,8 +1,13 @@
 ---
 
-# TODO test and enable
-- name: Join nodes to cluster
+- name: start k8s-node
+  debug: msg="starting k8s-node"
+
+- include: ../k8s-all/tasks/advertise-ip.yml
+
+- name: join nodes
   become: True
   become_user: "{{ username }}"
   command: sudo kubeadm join --token {{ token }} {{ api_advertise_ip }}:6443
+  when: "'kube-workers' in group_names"
 

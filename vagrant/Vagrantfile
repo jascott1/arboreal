@@ -9,7 +9,7 @@ master_name="node-0"
 
 # nodes
 node_name_prefix="node"
-node_count=2
+node_count=0
 node_memory=1024
 
 groups = {}
