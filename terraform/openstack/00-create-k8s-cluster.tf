@@ -7,28 +7,33 @@ variable "node-count" {
 }
 variable "internal-ip-pool" {}
 variable "floating-ip-pool" {}
-variable "image-name" {}
 variable "image-flavor" {}
 variable "security-groups" {}
 variable "key-pair" {}
 variable "private-key-file" {
   default = "/root/.ssh/id_rsa"
 }
-
+variable "ubuntu-image" {
+  default = "xenial-server-cloudimg-amd64"
+}
+variable "centos-image" {
+  default = "centos-7-x86_64-genericcloud"
+}
 variable "os" {
   default = "ubuntu"
 }
 variable "user" {
   default = "ubuntu"
 }
+
 # Image references
 data "openstack_images_image_v2" "ubuntu" {
-  name = "ubuntu-16.04"
+  name = "${var.ubuntu-image}"
   most_recent = true
 
 }
 data "openstack_images_image_v2" "centos" {
-  name = "centos7"
+  name = "${var.centos-image}"
   most_recent = true
 }
 
@@ -69,6 +74,7 @@ resource "openstack_compute_instance_v2" "k8s-master" {
   network {
     name = "${var.internal-ip-pool}"
   }
+
   network {
     uuid = "${openstack_networking_network_v2.network-control.id}"
   }
@@ -109,7 +115,7 @@ resource "openstack_compute_floatingip_v2" "node-ip" {
 resource "openstack_compute_instance_v2" "k8s-node" {
   count = "${var.node-count}"
   name = "${var.prefix}-k8s-node-${count.index}"
-  image_name = "${var.image-name}"
+  image_id = "${null_resource.ref.triggers.image-id}"
   flavor_name = "${var.image-flavor}"
   key_pair = "${var.key-pair}"
   security_groups = ["${split(",", var.security-groups)}"]

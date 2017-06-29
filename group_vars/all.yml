@@ -14,7 +14,7 @@ service_cidr: 10.3.3.0/24
 # ubuntu
 #   terraform = ens3
 #   vagrant = enp0s8
-api_advertise_iface: enp0s8
+api_advertise_iface: ens3
 ## node .10 of service_cidr (10.3.3.10)
 kube_dns_ip: 10.3.3.10
 ## typically change this to your master's eth0 ip
