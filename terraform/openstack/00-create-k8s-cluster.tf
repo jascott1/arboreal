@@ -58,12 +58,12 @@ resource "openstack_networking_subnet_v2" "subnet-control" {
   ip_version = 4
 }
 
-## Create a single master node and floating IP
+# Create a single master node and floating IP
 resource "openstack_compute_floatingip_v2" "master-fip" {
   pool = "${var.floating-ip-pool}"
 
 }
-## Create a k8s master
+# Create a k8s master
 resource "openstack_compute_instance_v2" "k8s-master" {
   name = "${var.prefix}-k8s-master"
   image_id = "${null_resource.ref.triggers.image-id}"
@@ -106,7 +106,7 @@ resource "openstack_compute_floatingip_associate_v2" "master-fip-assoc" {
   fixed_ip = "${openstack_compute_instance_v2.k8s-master.network.0.fixed_ip_v4}"
 }
 
-##Create desired number of k8s nodes and floating IPs
+# Create desired number of k8s nodes and floating IPs
 resource "openstack_compute_floatingip_v2" "node-ip" {
   pool = "${var.floating-ip-pool}"
   count = "${var.node-count}"
