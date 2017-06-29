@@ -1,6 +1,9 @@
 # Using Vagrant
 
-The Vagrantfile generates a customized version of the Ansible inventory file. 
+Running the Vagrantfile: 
+
+  * creates the specified VMs
+  * generates a customized version of the Ansible inventory file 
 
 Note: Typical setups like a MacBook Pro do not have the resources to run a  
 complete installation of kolla-kubernetes. This setup should facilitate development
