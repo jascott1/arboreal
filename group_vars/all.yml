@@ -4,7 +4,7 @@
 ## the default for become_user operations (typically ubuntu on ubuntu)
 username: "{{ ansible_user }}"
 ## Taint master- and label master as kolla-worker
-master_works: True
+master_works: False
 
 # kube
 token: c2d386.f79b2b89b6138441
@@ -19,16 +19,16 @@ api_advertise_iface: ens3
 kube_dns_ip: 10.3.3.10
 ## typically change this to your master's eth0 ip
 #api_advertise_ip: 10.0.0.5
-kube_version: 1.6.5
+kube_version: 1.7.5
 
 # network
-network_driver: 'weave'  # canal or weave
+network_driver: 'canal'  # canal or weave
 ## canal
 canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.1.0.0
 
 # helm (specify x.y.z or 'latest')
-helm_version: "2.5.0"
+helm_version: "2.6.1"
 
 # kolla
 base_distro: "centos"
