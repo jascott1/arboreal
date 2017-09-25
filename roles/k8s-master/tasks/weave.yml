@@ -1,4 +1,4 @@
 ---
 - name: Install weave
-  command: "kubectl apply -f https://git.io/weave-kube-1.7"
+  command: "kubectl apply -f https://git.io/weave-kube-1.6"
   when: kubeadm_init_out.changed
