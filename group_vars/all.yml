@@ -22,7 +22,7 @@ kube_dns_ip: 10.3.3.10
 kube_version: 1.7.5
 
 # network
-network_driver: 'canal'  # canal or weave
+network_driver: 'weave'  # canal or weave
 ## canal
 canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.1.0.0
