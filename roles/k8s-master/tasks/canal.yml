@@ -2,7 +2,7 @@
 
 - name: Get canal.yaml
   get_url:
-    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/canal.yaml
+    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml
     dest: /tmp/canal.yaml
     mode: 0664
   register:
@@ -10,7 +10,7 @@
 
 - name: Get rbac.yaml
   get_url:
-    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.6/rbac.yaml
+    url: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/rbac.yaml
     dest: /tmp/rbac.yaml
     mode: 0664
   register:
