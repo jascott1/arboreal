@@ -1,0 +1,5 @@
+---
+
+- name: Get advertise IP
+  set_fact:
+    api_advertise_ip: "{{ hostvars[groups['kube-masters'][0]]['ansible_' + management_iface]['ipv4']['address'] }}"
