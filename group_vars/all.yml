@@ -27,6 +27,22 @@ network_driver: 'weave'  # canal or weave
 canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.1.0.0
 
+# cloud provider
+cloud_provider: openstack
+cloud_config: /etc/kubernetes/cloud-config
+## openstack provider
+## Requires environment variables
+openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+openstack_tenant_id: "{{ lookup('env','OS_TENANT_ID') }}"
+openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
+openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+openstack_region: "{{ lookup('env','OS_REGION_NAME') }}"
+openstack_domain_name: "{{ lookup('env','OS_DOMAIN_NAME') }}"
+
+# extra kubelet args
+kubelet_args: " --cloud-provider={{ cloud_provider }} --cloud-config={{ cloud_config }}"
+
 # helm (specify x.y.z or 'latest')
 helm_version: "2.6.1"
 
