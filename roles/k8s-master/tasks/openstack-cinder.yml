@@ -8,6 +8,3 @@
 
 - name: Kubectl create storage class (OpenStack Cinder)
   command: kubectl create -f /tmp/storageclass-cinder.yaml
-
-- name: Set default storage class (OpenStack Cinder)
-  command: "kubectl patch storageclass cinder -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
