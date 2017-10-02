@@ -3,10 +3,18 @@
 - include: iptables.yml
 - include: kubeadm-init.yml
 - include: rbac.yml
-- include: helm.yml
+
 
 # Networking overlay
 - include: canal.yml
   when: network_driver == 'canal'
 - include: weave.yml
   when: network_driver == 'weave'
+
+# Storage
+- include: openstack-cinder.yml
+  when:
+    - dynamic_provision_enabled
+    - dynamic_provisioner == 'openstack-cinder'
+
+- include: helm.yml

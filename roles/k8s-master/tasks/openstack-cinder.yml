@@ -1,0 +1,13 @@
+---
+
+- name: Copy storage class file (OpenStack Cinder)
+  template:
+    src: storageclass-cinder.yml
+    dest: /tmp/storageclass-cinder.yaml
+    mode: 0644
+
+- name: Kubectl create storage class (OpenStack Cinder)
+  command: kubectl create -f /tmp/storageclass-cinder.yaml
+
+- name: Set default storage class (OpenStack Cinder)
+  command: "kubectl patch storageclass cinder -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
