@@ -21,7 +21,7 @@
 
 - name: Kubeadm init
   become: True
-  command: kubeadm init --config=/tmp/kubeadm-init.conf
+  command: "kubeadm init --config=/tmp/kubeadm-init.conf"
   register: kubeadm_init_out
   when: not etcd_dir.stat.exists
 

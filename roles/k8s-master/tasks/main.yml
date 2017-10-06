@@ -16,5 +16,3 @@
   when:
     - dynamic_provision_enabled
     - dynamic_provisioner == 'openstack-cinder'
-
-- include: helm.yml

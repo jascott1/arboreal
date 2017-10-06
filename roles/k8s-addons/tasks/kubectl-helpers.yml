@@ -1,0 +1,11 @@
+---
+
+- name: Add kubectl alias k=kubectl
+  lineinfile:
+    dest: /home/{{ username }}/.bashrc
+    line: "alias k=kubectl"
+
+- name: Add env ks="-n kube-system"
+  lineinfile:
+    dest: /home/{{ username }}/.bashrc
+    line: "export ks=\"-n kube-system\""

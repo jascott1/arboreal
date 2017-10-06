@@ -1,0 +1,36 @@
+---
+
+# Helm
+- name: Download Helm setup script with +x permission
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+    dest: /tmp/get_helm.sh
+    mode: 0777
+
+- name: Install Helm
+  command: /tmp/get_helm.sh -v "v{{ helm_version }}"
+
+- name: Run Helm Init
+  command: "helm init"
+  register: helm_init_out
+
+
+- name: Log Helm init
+  debug: msg="{{ helm_init_out }}"
+  when: helm_init_out.changed
+
+- name: Wait on Tiller deployment rollout
+  command: "kubectl rollout status deployment/tiller-deploy -n kube-system -w"
+
+- name: Generic wait for cluster (20s)
+  command: "sleep 30"
+
+# TODO solve mystery of the initially sleeping tiller...
+# Note: tiller pods restarts very quickly so took sleepy way out
+- name: Restart Tiller
+  shell: "kubectl delete pod $(kubectl get pods -n kube-system | grep tiller | cut -d' ' -f1) -n kube-system"
+
+- name: Wait on Tiller
+  #shell: until kubectl get pods -n kube-system -o template --template '{{range {{ "." }} items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}' | grep tiller-deploy | cut -d' ' -f2 | grep -m 1 'Running'; do sleep 2 ; done
+  shell: until kubectl get pods -n kube-system | grep tiller-deploy | grep -m 1 "1/1"; do sleep 2; done
+

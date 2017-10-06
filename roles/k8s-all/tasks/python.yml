@@ -1,5 +1,6 @@
 ---
 
+# This installs python, raw commands just use ssh. See http://docs.ansible.com/ansible/latest/raw_module.html
 - name: "Install python2 and python-simplejson"
   become: True
   raw: "yum install -y python python-simplejson || (apt-get update && apt-get install -y python2.7 python-simplejson)"

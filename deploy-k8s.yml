@@ -19,3 +19,7 @@
   roles:
     - k8s-node
 
+- hosts: kube-masters
+  roles:
+    - k8s-addons
+

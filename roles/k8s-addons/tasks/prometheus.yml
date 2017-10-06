@@ -1,0 +1,12 @@
+#https://github.com/coreos/prometheus-operator.git
+
+- name: Clone prometheus-operator
+  git:
+    repo: 'https://github.com/coreos/prometheus-operator.git'
+    dest: /tmp/prometheus-operator
+
+- name: Install prometheus-operator
+  shell: "cd /tmp/prometheus-operator/contrib/kube-prometheus/ && hack/cluster-monitoring/deploy"
+
+- name: Log prometheus dashboard URL
+  debug: msg="Using kubctl proxy on your local machine, you can browse prometheus dashboard at 'http://127.0.0.1:8001/api/v1/namespaces/monitoring/services/grafana/proxy'"

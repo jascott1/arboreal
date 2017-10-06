@@ -6,4 +6,5 @@ api:
 networking:
   serviceSubnet: {{ service_cidr }}
   podSubnet: {{ pod_cidr }}
+kubernetesVersion: v{{ kubernetes_version }}
 token: {{ token }}
