@@ -8,7 +8,7 @@ master_works: False
 
 # kube
 token: c2d386.f79b2b89b6138441
-pod_cidr: 10.244.0.0/16 # 10.1.0.0/16, or 10.244.0.0/16 for Canal,
+pod_cidr: 10.1.0.0/16 # 10.1.0.0/16, or 10.244.0.0/16 for Canal,
 service_cidr: 10.3.3.0/24
 ## typically change this to eth0 equivalent
 # ubuntu
@@ -29,7 +29,9 @@ kube_version: 1.7.5 # exactly 1.7.5 or 1.8.0
 kubernetes_version: 1.7.7 # >= 1.7.5 or >= 1.8.0
 
 # network
-network_driver: 'canal'  # canal or weave
+## NOTE: Canal isn't fully functional within this cluster setup and issues have been reported.
+## Use Weave unless you are working on resolving Canal issues.
+network_driver: 'weave'  # canal or weave
 ## canal
 canal_dns_ip: 10.3.3.100
 canal_pod_network: 10.244.0.0 # canal requires 10.244.0.0
