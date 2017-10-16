@@ -1,0 +1,8 @@
+---
+
+- name: Add incubator charts
+  command: "helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator"
+
+- name: Install registry chart
+  command: "helm install --name registry incubator/docker-registry"
+

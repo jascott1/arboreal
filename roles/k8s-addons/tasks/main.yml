@@ -1,0 +1,13 @@
+---
+
+- include: helm.yml
+  when: helm_enabled
+
+- include: registry.yml
+  when: registry_enabled
+
+- include: prometheus.yml
+  when: prometheus_enabled
+
+- include: kubectl-helpers.yml
+  when: helpers_enabled

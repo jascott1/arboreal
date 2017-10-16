@@ -1,0 +1,4 @@
+[Service]
+MountFlags=shared
+ExecStart=
+ExecStart=/usr/bin/dockerd --storage-driver=overlay2 {% if docker_registry %} --insecure-registry {{ docker_registry }}{% endif %}
