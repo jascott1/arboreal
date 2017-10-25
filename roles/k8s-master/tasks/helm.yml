@@ -10,10 +10,15 @@
 - name: Install Helm
   command: /tmp/get_helm.sh -v "v{{ helm_version }}"
 
-- name: Run Helm Init
-  command: "helm init"
-  register: helm_init_out
+- name: kubectl create serviceaccount tiller
+  shell: kubectl create serviceaccount --namespace kube-system tiller
 
+- name: kubectl create clusterrolebinding tiller-cluster-rule
+  shell: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+- name: helm init --service-account tiller
+  shell: helm init --service-account tiller
+  register: helm_init_out
 
 - name: Log Helm init
   debug: msg="{{ helm_init_out }}"
@@ -33,4 +38,3 @@
 - name: Wait on Tiller
   #shell: until kubectl get pods -n kube-system -o template --template '{{range {{ "." }} items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}' | grep tiller-deploy | cut -d' ' -f2 | grep -m 1 'Running'; do sleep 2 ; done
   shell: until kubectl get pods -n kube-system | grep tiller-deploy | grep -m 1 "1/1"; do sleep 2; done
-
