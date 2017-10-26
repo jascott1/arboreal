@@ -10,3 +10,8 @@
 
 - include: k8s-config.yml
 
+- include: ceph-user.yml
+  when:
+      - dynamic_provision_enabled
+      - dynamic_provisioner == 'ceph'
+

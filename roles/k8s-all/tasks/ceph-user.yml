@@ -1,0 +1,28 @@
+---
+
+- name: Ensure 'wheel' group exists
+  group:
+    name: wheel
+    state: present
+  become: True
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+  become: True
+
+- name: Add sudoers users to wheel group
+  user:
+    name: "ceph-deploy"
+    groups: wheel
+    append: yes
+    shell: /bin/bash
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    createhome: yes
+  become: True

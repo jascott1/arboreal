@@ -69,34 +69,6 @@
   when:
     - ansible_os_family == 'Debian'
 
-## User and group setup for user ceph-deploy
-- name: Ensure 'wheel' group exists
-  group:
-    name: wheel
-    state: present
-  become: True
-
-- name: Allow 'wheel' group to have passwordless sudo
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: visudo -cf %s
-  become: True
-
-- name: Add sudoers users to wheel group
-  user:
-    name: "ceph-deploy"
-    groups: wheel
-    append: yes
-    shell: /bin/bash
-    generate_ssh_key: yes
-    ssh_key_bits: 2048
-    ssh_key_file: .ssh/id_rsa
-    createhome: yes
-  become: True
-
 - name: Add ceph-deploy user to authorized_keys
   shell: cp -a ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
   become: True
@@ -237,6 +209,16 @@
 - name: Set rbd as default storageClass
   shell: "kubectl patch storageclass rbd -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
 
+- name: echo master pub key
+  shell:
+    cmd: echo $(cat ~/.ssh/id_rsa.pub)
+  register: master_pubkey_raw
+  become: True
+  become_user: ceph-deploy
+
+- name: set fact master pub key
+  set_fact:
+    master_pubkey: "{{ master_pubkey_raw.stdout }}"
 # ceph troubleshooting
 ## ceph osd tree
 ## ceph health detail

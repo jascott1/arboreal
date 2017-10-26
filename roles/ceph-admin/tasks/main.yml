@@ -1,0 +1,6 @@
+---
+
+- include: ceph-deploy-nodes.yml
+  when:
+    - dynamic_provision_enabled
+    - dynamic_provisioner == 'ceph'

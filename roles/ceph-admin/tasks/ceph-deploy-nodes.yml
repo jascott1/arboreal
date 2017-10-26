@@ -1,0 +1,37 @@
+---
+
+- name: Get node array for ceph
+  set_fact:
+    node_ips: "{{ groups['kube-workers'] | map('extract', hostvars, ['ansible_ssh_host']) | list | join(' ') }}"
+
+- name: ssh-keyscan ceph nodes
+  shell:
+    cmd: "ssh-keyscan -H {{ item }} >> ~/.ssh/known_hosts"
+    chdir: ~/
+  become: True
+  become_user: ceph-deploy
+  with_items: "{{ node_ips }}"
+
+- name: ceph deploy install nodes
+  shell:
+    cmd: ceph-deploy --username ceph-deploy install {{ item }}
+    chdir: ~/
+  become: True
+  become_user: ceph-deploy
+  with_items: "{{ node_ips }}"
+
+- name: ceph deploy admin nodes
+  shell:
+    cmd: ceph-deploy --username ceph-deploy admin {{ item }}
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+  with_items: "{{ node_ips.split(' ') }}"
+
+- name: ceph deploy install osd create
+  shell:
+    cmd: "ceph-deploy --username ceph-deploy osd create {{ item }}:vdb"
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+  with_items: "{{ node_ips.split(' ') }}"

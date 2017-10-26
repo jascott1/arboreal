@@ -21,8 +21,7 @@ kube_dns_ip: 10.3.3.10
 #api_advertise_ip: 10.0.0.5
 
 ## NOTE: 1.8.0 currently NOT working.
-### Weave 1.8 is not available. TODO update weave when 1.8 available. https://cloud.weave.works/k8s
-### Canal 1.8 is not available. TODO update canal when 1.8 available. https://github.com/projectcalico/canal/blob/master/k8s-install/README.md
+
 ## version of k8s dependencies from repo (kubectl, kubeadm, kubelet)
 kube_version: 1.7.5 # exactly 1.7.5 or 1.8.0
 ## version of Kubernetes to install with Kubeadm (should match y version from kube_version)
@@ -52,7 +51,7 @@ openstack_domain_name: "{{ lookup('env','OS_DOMAIN_NAME') }}"
 # storage
 dynamic_provision_enabled: True
 #dynamic_provisioner: openstack-cinder # requires cloud_provider: openstack
-dynamic_provisioner: ceph # requires cloud_provider: openstack
+dynamic_provisioner: ceph
 
 # extra kubelet args
 ## args for dynamic provisioning - cinder
