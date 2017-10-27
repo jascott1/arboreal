@@ -62,7 +62,7 @@ kubelet_args: ""
 # add-ons
 ## helm (specify x.y.z or 'latest')
 helm_enabled: True
-helm_version: "2.6.1"
+helm_version: "2.7.0"
 ## registry
 registry_enabled: False
 registry_pvc_size: 20Gi
