@@ -35,3 +35,16 @@
   become: True
   become_user: ceph-deploy
   with_items: "{{ node_ips.split(' ') }}"
+
+# TODO make dynamic based on node count
+- name: ceph osd pool set kollavolumes pg_num 128
+  shell:
+    cmd: "ceph osd pool set kollavolumes pg_num 128"
+  become: True
+
+- name: ceph osd pool set kollavolumes pgp_num 128
+  shell:
+    cmd: "ceph osd pool set kollavolumes pgp_num 128"
+  become: True
+
+
