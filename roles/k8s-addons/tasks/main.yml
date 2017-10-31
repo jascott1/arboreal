@@ -1,8 +1,5 @@
 ---
 
-- include: helm.yml
-  when: helm_enabled
-
 - include: registry.yml
   when: registry_enabled
 

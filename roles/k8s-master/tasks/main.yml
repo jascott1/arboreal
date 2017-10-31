@@ -11,8 +11,17 @@
 - include: weave.yml
   when: network_driver == 'weave'
 
+# Package manager
+- include: helm.yml
+  when: helm_enabled
+
 # Storage
 - include: openstack-cinder.yml
   when:
     - dynamic_provision_enabled
     - dynamic_provisioner == 'openstack-cinder'
+
+- include: ceph.yml
+  when:
+    - dynamic_provision_enabled
+    - dynamic_provisioner == 'ceph'

@@ -119,9 +119,27 @@ resource "openstack_compute_instance_v2" "k8s-node" {
   flavor_name = "${var.image-flavor}"
   key_pair = "${var.key-pair}"
   security_groups = ["${split(",", var.security-groups)}"]
+
   network {
     name = "${var.internal-ip-pool}"
   }
+
+  block_device {
+    source_type           = "image"
+    uuid                  = "${null_resource.ref.triggers.image-id}"
+    destination_type      = "local"
+    boot_index            = 0
+    delete_on_termination = true
+  }
+
+  block_device {
+    source_type           = "blank"
+    destination_type      = "volume"
+    volume_size           = 20
+    boot_index            = 1
+    delete_on_termination = true
+  }
+
   user_data = "#!/bin/bash\nsudo yum install -y python python-simplejson || (apt-get update && apt-get install -y python2.7 python-simplejson)"
   floating_ip = "${element(openstack_compute_floatingip_v2.node-ip.*.address, count.index)}"
 }

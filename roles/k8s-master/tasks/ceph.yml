@@ -1,0 +1,226 @@
+---
+
+# Install ceph packages
+- name: Start ceph installation
+  debug: msg="Starting ceph installation task"
+
+# TODO note in README that this will give kolla label even when not running kolla playbook
+- name: Add node label kolla_controller
+  shell: kubectl label node $(hostname -s) kolla_controller=true
+
+## RedHat
+- yum_repository:
+    name: Ceph packages for x86_64
+    description: Ceph packages for x86_64
+    baseurl: https://download.ceph.com/rpm-luminous/el7/x86_64
+    state: present
+    gpgkey: https://download.ceph.com/keys/release.asc
+    gpgcheck: no
+    repo_gpgcheck: yes
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- yum_repository:
+    name: Ceph noarch packages
+    description: Ceph noarch packages
+    baseurl: https://download.ceph.com/rpm-luminous/el7/noarch
+    state: present
+    gpgkey: https://download.ceph.com/keys/release.asc
+    gpgcheck: no
+    repo_gpgcheck: yes
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- yum_repository:
+    name: Ceph source packages
+    description: Ceph source packages
+    baseurl: https://download.ceph.com/rpm-luminous/el7/SRPMS
+    state: present
+    gpgkey: https://download.ceph.com/keys/release.asc
+    gpgcheck: no
+    repo_gpgcheck: yes
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Install ceph packages [RedHat]
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: True
+  with_items:
+    - ceph-deploy
+  become: True
+  when:
+    - ansible_os_family == 'RedHat'
+
+## Debian
+- name: Install ceph packages [Debian]
+  apt:
+    name: "{{ item }}"
+    state: present
+    allow_unauthenticated: yes
+    update_cache: True
+  become: True
+  with_items:
+    - ceph-deploy
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Add ceph-deploy user to authorized_keys
+  shell: cp -a ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+  become: True
+  become_user: ceph-deploy
+
+- name: Chmod .ssh
+  shell: chmod 700 ~/.ssh/
+  become: True
+  become_user: ceph-deploy
+
+# Configure and install ceph
+- name: Create ~mycluster
+  file:
+    path: ~/mycluster
+    state: directory
+    mode: 0755
+  become: True
+  become_user: ceph-deploy
+
+- name: Copy ceph.conf
+  template:
+    src: ceph.conf.tpl
+    dest: ~/mycluster/ceph.conf
+    mode: 0644
+  become: True
+  become_user: ceph-deploy
+
+- name: ceph-deploy new
+  shell:
+    cmd: ceph-deploy new $(hostname -s)
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+
+- name: ceph-deploy install
+  shell:
+    cmd: ceph-deploy install $(hostname -s)
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+
+- name: ceph-deploy mon create-initial
+  shell:
+    cmd: ceph-deploy mon create-initial
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+
+- name: ceph-deploy admin
+  shell:
+    cmd: ceph-deploy admin $(hostname -s)
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+
+- name: ceph-deploy osd create
+  shell:
+    cmd: ceph-deploy osd create $(hostname -s):vdb
+    chdir: ~/mycluster
+  become: True
+  become_user: ceph-deploy
+
+## as root
+- name: ceph osd pool set rbd min_size
+  shell: ceph osd pool set rbd min_size 1
+  become: True
+
+- name: ceph osd pool set rbd size
+  shell: ceph osd pool set rbd size 1
+  become: True
+
+- name: ceph osd pool create kollavolumes
+  shell: ceph osd pool create kollavolumes 16 16
+  become: True
+
+- name: ceph osd pool set kollavolumes min_size
+  shell: ceph osd pool set kollavolumes min_size 1
+  become: True
+
+- name: ceph osd pool set kollavolumes size
+  shell: ceph osd pool set kollavolumes size 1
+  become: True
+
+# as default user
+- name: Create namespace kolla
+  shell: kubectl create namespace kolla
+  ignore_errors: True
+
+- name: ceph auth get-or-create
+  shell:
+    cmd: ceph auth get-or-create client.kolla mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=kollavolumes' | awk '{if($1 == "key"){print $3}}' > /tmp/cephauth
+  become: True
+
+- name: kubectl create secret generic ceph-kolla
+  shell:
+    cmd: kubectl create secret generic ceph-kolla --namespace=kolla --from-file=key=/tmp/cephauth
+
+# todo use ansbile file
+- name: rm -f /tmp/cephauth
+  shell: rm -f /tmp/cephauth
+  become: True
+
+# todo use ansible git
+- name: git clone https://github.com/kfox1111/charts/
+  shell:
+    cmd: git clone https://github.com/kfox1111/charts/
+    chdir: ~/
+
+- name: git checkout -b ceph-provisioner origin/ceph-provisioner
+  shell:
+    cmd: git checkout -b ceph-provisioner origin/ceph-provisioner
+    chdir: ~/charts
+
+- name: helm dep up
+  shell:
+    cmd: helm dep up
+    chdir: ~/charts/stable/ceph-provisioner
+
+- name: Copy ceph-provisioner.values.yml
+  template:
+    src: ceph-provisioner.values.yml
+    dest: ~/ceph-provisioner.values.yml
+    mode: 0644
+
+- name: echo ceph key
+  shell:
+    cmd: echo $(grep key  ceph.client.admin.keyring | awk '{print $3}')
+    chdir: ~/mycluster
+  register: cephkey
+  become: True
+  become_user: ceph-deploy
+
+- name: helm install stable/cephprovisioner
+  shell:
+    cmd: helm install stable/ceph-provisioner --name ceph-provisioner --namespace kube-system --set "adminSecret.key={{ cephkey.stdout }},monitors[0]={{ api_advertise_ip }}"  --values ~/ceph-provisioner.values.yml
+    chdir: ~/charts
+
+- name: Set rbd as default storageClass
+  shell: "kubectl patch storageclass rbd -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
+
+- name: echo master pub key
+  shell:
+    cmd: echo $(cat ~/.ssh/id_rsa.pub)
+  register: master_pubkey_raw
+  become: True
+  become_user: ceph-deploy
+
+- name: set fact master pub key
+  set_fact:
+    master_pubkey: "{{ master_pubkey_raw.stdout }}"
+# ceph troubleshooting
+## ceph osd tree
+## ceph health detail
+## ceph -s
+

@@ -50,6 +50,9 @@
     dest: "{{ cloud_config }}"
     mode: 0640
   become: True
+  when:
+      - dynamic_provision_enabled
+      - dynamic_provisioner == 'openstack-cinder'
 
 - name: reload systemd
   become: True

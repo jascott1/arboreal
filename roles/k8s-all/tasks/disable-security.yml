@@ -12,3 +12,9 @@
   shell: systemctl stop firewalld && systemctl disable firewalld
   become: True
   ignore_errors: True
+
+# Required for k8s 1.8+
+- name: Turn off swap
+  shell: swapoff -a
+  become: True
+  ignore_errors: True

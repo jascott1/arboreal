@@ -1,8 +1,23 @@
 ---
 
+- name: Start hostname
+  debug: msg="Starting hostname task"
+
+- include: tasks/advertise-ip.yml
+
 - name: Add hostname to /etc/hosts
   replace:
     dest: /etc/hosts
     regexp: 'localhost'
     replace: 'localhost {{ inventory_hostname }}'
+  become: True
+
+- name: echo hostname
+  shell: echo $(hostname -s)
+  register: hostname
+
+- name: Add hostname to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ api_advertise_ip }} {{ hostname.stdout }}"
   become: True

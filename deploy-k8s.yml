@@ -20,6 +20,8 @@
     - k8s-node
 
 - hosts: kube-masters
+  gather_facts: true
   roles:
+    - ceph-admin
     - k8s-addons
 

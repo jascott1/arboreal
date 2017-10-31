@@ -1,6 +1,6 @@
 kind: MasterConfiguration
 apiVersion: kubeadm.k8s.io/v1alpha1
-cloudProvider: {{ cloud_provider }}
+{% if cloud_provider %}cloudProvider: {{ cloud_provider }}{% endif %}
 api:
   advertiseAddress: {{ api_advertise_ip }}
 networking:

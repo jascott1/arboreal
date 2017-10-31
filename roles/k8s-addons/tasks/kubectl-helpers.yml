@@ -5,7 +5,45 @@
     dest: /home/{{ username }}/.bashrc
     line: "alias k=kubectl"
 
+# use kube-system namespace
+# k get deploy tiller $ks
 - name: Add env ks="-n kube-system"
   lineinfile:
     dest: /home/{{ username }}/.bashrc
     line: "export ks=\"-n kube-system\""
+
+# all objects in all namespaces
+# k get $all
+- name: Add env all="crd,endpoints,all --all-namespaces"
+  lineinfile:
+    dest: /home/{{ username }}/.bashrc
+    line: "export all='crd,endpoints,pvc,all --all-namespaces'"
+
+# allz objects without namespace
+# k get $allz
+- name: Add env allz="sc"
+  lineinfile:
+    dest: /home/{{ username }}/.bashrc
+    line: "export allz='sc'"
+
+# output in yaml
+# k get pod mypod $oy
+- name: Add env oy="-o yaml"
+  lineinfile:
+    dest: /home/{{ username }}/.bashrc
+    line: "export oy='-o yaml'"
+
+- name: Copy test manifests to user home
+  copy:
+    src: ../templates/test-manifests/
+    dest: ~/test-manifests
+    mode: 0644
+  become: True
+  become_user: "{{ ansible_user }}"
+
+- name: kubectl bash completions
+  lineinfile:
+    path: ~/.bashrc
+    line: 'source <(kubectl completion bash)'
+  become: True
+  become_user: "{{ ansible_user }}"
