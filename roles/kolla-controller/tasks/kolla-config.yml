@@ -39,8 +39,6 @@
   with_items: "{{ node_list.stdout.split('\n') }}"
   ignore_errors: True
 
-
-
 - set_fact:
       globals_config: "{{ lookup('template', 'templates/globals_config.j2') }}"
 
@@ -93,3 +91,7 @@
 - name: Enable resolv.conf workaround
   command: /home/{{ username }}/kolla-kubernetes/tools/setup-resolv-conf.sh kolla
   ignore_errors: True
+
+# TODO convert to separate account for increased security
+- name: Create kolla context for kubectl
+  shell: kubectl config set-context kolla --cluster=kubernetes --user=kubernetes-admin --namespace=kolla

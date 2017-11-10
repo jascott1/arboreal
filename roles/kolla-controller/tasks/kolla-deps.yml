@@ -10,6 +10,7 @@
     - python-pip
     - python-dev
     - libssl-dev
+    - crudini
   when:
     - ansible_os_family == 'Debian'
 
@@ -34,6 +35,7 @@
     - ansible
     - python-pip
     - python-devel
+    - crudini
   become: True
   when:
     - ansible_os_family == 'RedHat'

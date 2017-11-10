@@ -77,7 +77,7 @@ install_type: "source"
 management_iface: "{{ api_advertise_iface }}"
 management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
 ## a second interface for neutron, typically without an ip
-neutron_iface: ens4
+neutron_iface: ens4 #ens4 or enp0s9
 external_vip: 192.168.7.105
 dns_name: 192.168.7.105
 cinder_lvm_ip: 192.168.7.105
