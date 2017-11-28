@@ -21,7 +21,11 @@
   become: True
 
 - name: Install apt packages
-  apt: name={{item}} state=present
+  apt:
+    name: "{{ item }}"
+    state: present
+    allow_unauthenticated: yes
+    update_cache: True
   become: True
   with_items: "{{ debian_pkg_install }}"
 

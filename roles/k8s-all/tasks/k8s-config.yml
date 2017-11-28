@@ -2,6 +2,17 @@
 
 # Configuration
 
+- name: Disable swap
+  shell: "swapoff -a"
+  become: True
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+  become: True
+
 - name: Enable and start docker
   systemd: name=docker state=started enabled=yes
   become: True
