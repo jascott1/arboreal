@@ -48,7 +48,7 @@ global:
        all:
          add_port: true
          ext_bridge_name: br-ex
-         ext_interface_name: enp1s0f1
+         ext_interface_name: {{ neutron_iface }}
          setup_bridge: true
      horizon:
        all:

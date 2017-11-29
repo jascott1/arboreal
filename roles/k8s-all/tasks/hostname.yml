@@ -16,8 +16,18 @@
   shell: echo $(hostname -s)
   register: hostname
 
-- name: Add hostname to /etc/hosts
+- name: echo IP
+  shell: "ip address show dev ens3 scope global | awk '/inet / {split($2,var,\"/\"); print var[1]}'"
+  register: ipaddress
+
+- name: Add node hostname to /etc/hosts
   lineinfile:
     path: /etc/hosts
-    line: "{{ api_advertise_ip }} {{ hostname.stdout }}"
+    line: "{{ ipaddress.stdout }} {{ hostname.stdout }}"
   become: True
+
+#- name: Add master hostname to /etc/hosts
+#  lineinfile:
+#    path: /etc/hosts
+#    line: "{{ api_advertise_ip }} {{ hostname.stdout }}"
+#  become: True

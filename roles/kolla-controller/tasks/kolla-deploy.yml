@@ -12,7 +12,7 @@
   command: |
     kollakube res create configmap \
     glance-api-haproxy glance-registry-haproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy \
+    nova-api-haproxy cinder-api-haproxy \
     placement-api placement-api-haproxy
   ignore_errors: True
 
@@ -75,7 +75,7 @@
     - memcached
     - glance-api
     - glance-registry
-    #- cinder-api # already installed for some reason. kollakube?
+    - cinder-api
     - cinder-backup
     - cinder-scheduler
     - cinder-volume
@@ -102,12 +102,18 @@
 - set_fact:
     cloud_yaml: "{{ lookup('template', 'templates/cloud.yaml') }}"
 
-- name: Create a cloud.yaml file for the deployment of the charts
-  blockinfile:
+#- name: Create a cloud.yaml file for the deployment of the charts
+#  blockinfile:
+#    dest: /home/{{ username }}/cloud.yaml
+#    content: '{{ cloud_yaml }}'
+#    state: present
+#    create: yes
+
+- name: Template cloud.yaml
+  template:
+    src: cloud.yaml
     dest: /home/{{ username }}/cloud.yaml
-    content: '{{ cloud_yaml }}'
-    state: present
-    create: yes
+    mode: 0666
 
 # TODO remove when new logging is complete
 - name: Disable experimental kube logging
@@ -144,10 +150,10 @@
     - glance
     - horizon
     - cinder-control
-    - openvswitch
-    - neutron
-    - nova-control
-    - nova-compute
+#    - openvswitch
+#    - neutron
+#    - nova-control
+#    - nova-compute
 
 # NOTE: Horizon might be missing following symlink
 # ln -s /var/lib/kolla/venv/lib/python2.7/site-packages /usr/share/openstack-dashboard

@@ -52,8 +52,7 @@
 
 # TODO remove after underscores used in cm keys
 - name: HACK checkout branch of kk8s
-  become: True
-  shell: cd /home/{{ username }}/kolla-kubernetes && git fetch https://git.openstack.org/openstack/kolla-kubernetes refs/changes/47/520847/2 && git checkout FETCH_HEAD
+  shell: cd /home/{{ username }}/kolla-kubernetes && git fetch https://git.openstack.org/openstack/kolla-kubernetes refs/changes/47/520847/7 && git checkout FETCH_HEAD
 
 - name: Install kolla-kubernetes
   become: True

@@ -5,10 +5,11 @@
 
 - include: ../k8s-all/tasks/advertise-ip.yml
 
+// TODO fix discovery token bypass
 - name: join nodes
   become: True
   become_user: "{{ username }}"
-  command: sudo kubeadm join --token {{ token }} {{ api_advertise_ip }}:6443
+  command: sudo kubeadm join --token {{ token }} --discovery-token-unsafe-skip-ca-verification {{ api_advertise_ip }}:6443
   when: "'kube-workers' in group_names"
 
 - name: add master nodes ceph-deploy pubkey to authorized_keys
