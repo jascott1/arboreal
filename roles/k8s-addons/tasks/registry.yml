@@ -3,6 +3,7 @@
 - name: Add incubator charts
   command: "helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator"
 
+# TODO Remove pinned version of registry chart
 - name: Install registry chart
-  command: "helm install --name registry incubator/docker-registry"
+  command: "helm repo update && helm install incubator/docker-registry --version 0.2.2"
 

@@ -150,12 +150,12 @@
     - glance
     - horizon
     - cinder-control
-#    - openvswitch
-#    - neutron
-#    - nova-control
-#    - nova-compute
+    - openvswitch
+    - neutron
+    - nova-control
+    - nova-compute
 
-# NOTE: Horizon might be missing following symlink
+# NOTE: Horizon source might be missing following symlink
 # ln -s /var/lib/kolla/venv/lib/python2.7/site-packages /usr/share/openstack-dashboard
 
 #- name: Start kolla-kubernetes microservices part1

@@ -5,7 +5,7 @@
 
 - include: ../k8s-all/tasks/advertise-ip.yml
 
-// TODO fix discovery token bypass
+# TODO fix discovery token bypass
 - name: join nodes
   become: True
   become_user: "{{ username }}"
