@@ -5,5 +5,5 @@
 
 # TODO Remove pinned version of registry chart
 - name: Install registry chart
-  command: "helm repo update && helm install incubator/docker-registry --version 0.2.2"
+  shell: "helm repo update && helm install incubator/docker-registry --version 0.2.2"
 

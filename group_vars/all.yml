@@ -68,7 +68,7 @@ helpers_enabled: True
 
 # kolla
 base_distro: "centos"
-install_type: "source"
+install_type: "binary"
 management_iface: "{{ api_advertise_iface }}"
 management_ip: "{{ api_advertise_ip }}" # 172.17.0.1 usually docker0 or equivalent
 ## a second interface for neutron, typically without an ip
